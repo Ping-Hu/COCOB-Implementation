@@ -67,9 +67,9 @@ def coin_betting(init_wealth, T, epsilon = 1e-10):
         w = v*wealth
                  
         #real_coin = ora.real_coin_value(v)
-        gt = ora.real_coin_value2(v)
+        gt = ora.real_coin_value1(v)
         #obj = ora.coin_func_adagrad(real_coin,v,0)
-        obj = ora.coin_func_adagrad2(v,0)
+        obj = ora.coin_func_adagrad1(gt,v,0)
         objfuncvalues.append(obj)
         #print(real_coin)
         realvalues.append(gt)
@@ -233,11 +233,8 @@ def adagrad( func, initial_x, maximum_iterations, initial_stepsize=1, initial_su
     
     x = np.matrix(initial_x)
     d = initial_x.size
-    # initialization
     values = []
-    
     xs = []
-    #start_time = time.time()
     iterations = 0
    
     # subgradient updates
@@ -280,8 +277,8 @@ def draw_contour( func, T, gd_xs, newton_xs, fig, levels=np.arange(-0.5, 0.6, 0.
     plt.ion()
     plt.show()
     
-    line_gd, = plt.plot( gd_xs[0][0], gd_xs[1][0], linewidth=2, color='r', marker='o', label='GD' )
-    line_newton, = plt.plot( newton_xs[0][0], newton_xs[1][0], linewidth=2, color='m', marker='o',label='Newton' )
+    line_gd, = plt.plot( gd_xs[0][0], gd_xs[1][0], linewidth=2, color='r', marker='o', label='COCOB' )
+    line_newton, = plt.plot( newton_xs[0][0], newton_xs[1][0], linewidth=2, color='m', marker='o',label='ADAGRAD' )
     
     L = plt.legend(handles=[line_gd,line_newton])
     plt.draw()
@@ -296,77 +293,77 @@ def draw_contour( func, T, gd_xs, newton_xs, fig, levels=np.arange(-0.5, 0.6, 0.
         line_newton.set_ydata( np.append( line_newton.get_ydata(), newton_xs[1, min(i,T-1) ] ) )
 
         
-        L.get_texts()[0].set_text( " GD, %d iterations" % min(i,T-1) )
-        L.get_texts()[1].set_text( " Newton, %d iterations" % min(i,T-1) )    
+        L.get_texts()[0].set_text( " COCOB, %d iterations" % min(i,T-1) )
+        L.get_texts()[1].set_text( " ADAGRAD, %d iterations" % min(i,T-1) )    
         
         plt.draw()
         input("Press Enter to continue...")
 
-def adaDelta( func, initial_x, maximum_iterations, decay, windowsize, initial_stepsize=1, initial_sum_of_squares=1e-3):
-    """ 
-    adagrad
-    func:                   the function to optimize. It is called as "value, gradient = func( x, 1 )
-    initial_x:              the starting point, should be a float
-    maximum_iterations:     the maximum allowed number of iterations
-    initial_stepsize:       the initial stepsize, should be a float
-    initial_sum_of_squares: initial sum of squares
-    """
-    
-    x = initial_x
-    
-    # initialization
-    values = []
-    runtimes = []
-    xs = []
-    #start_time = time.time()
-    iterations = 0
-    v0=10
-    gradients = np.array([])
-    dxs = np.array([])
-    RMSg = 0
-    RMSx = 0
-    Eg = 0
-    Edx = 0
-    # subgradient updates
-    while True:
-        gt = ora.real_coin_value1(x)
-        value, gradient = ora.coin_func_adagrad1(gt,x,1)
-        print(gt)
-        value = np.double( value )
-    
-        # updating the logs
-        values.append( value )
-        #runtimes.append( time.time() - start_time )
-        xs.append( x )
-        
-        Eg = decay*np.sum(gradients)/(max(gradients.size,1)) + (1-decay)*(gradient**2)
-        RMSg = np.sqrt(initial_sum_of_squares+Eg)
-        
-        if gradients.size <= windowsize-1:
-            gradients = np.append(gradients,[gradient**2])
-            
-        else:
-            gradients = np.delete(gradients,0)
-            gradients = np.append(gradients,[gradient**2])
-        
-        RMSdx = np.sqrt(Edx+initial_sum_of_squares)
-        dx = -1*RMSdx/RMSg*gradient
-        Edx = decay*np.sum(dxs)/(max(dxs.size,1)) + (1-decay)*(dx**2)
-        
-        if dxs.size <= windowsize-1:
-            dxs = np.append(dxs, [dx**2])
-        else:
-            dxs = np.delete(dxs,0)
-            dxs = np.append(dxs,[dx**2])
-            
-        
-        x = x + dx
-        
-        iterations += 1
-        if iterations >= maximum_iterations:
-            break
-                
-    return (x, values, xs)    
+#def adaDelta( func, initial_x, maximum_iterations, decay, windowsize, initial_stepsize=1, initial_sum_of_squares=1e-3):
+#    """ 
+#    adagrad
+#    func:                   the function to optimize. It is called as "value, gradient = func( x, 1 )
+#    initial_x:              the starting point, should be a float
+#    maximum_iterations:     the maximum allowed number of iterations
+#    initial_stepsize:       the initial stepsize, should be a float
+#    initial_sum_of_squares: initial sum of squares
+#    """
+#    
+#    x = initial_x
+#    
+#    # initialization
+#    values = []
+#    runtimes = []
+#    xs = []
+#    #start_time = time.time()
+#    iterations = 0
+#    v0=10
+#    gradients = np.array([])
+#    dxs = np.array([])
+#    RMSg = 0
+#    RMSx = 0
+#    Eg = 0
+#    Edx = 0
+#    # subgradient updates
+#    while True:
+#        gt = ora.real_coin_value1(x)
+#        value, gradient = ora.coin_func_adagrad1(gt,x,1)
+#        print(gt)
+#        value = np.double( value )
+#    
+#        # updating the logs
+#        values.append( value )
+#        #runtimes.append( time.time() - start_time )
+#        xs.append( x )
+#        
+#        Eg = decay*np.sum(gradients)/(max(gradients.size,1)) + (1-decay)*(gradient**2)
+#        RMSg = np.sqrt(initial_sum_of_squares+Eg)
+#        
+#        if gradients.size <= windowsize-1:
+#            gradients = np.append(gradients,[gradient**2])
+#            
+#        else:
+#            gradients = np.delete(gradients,0)
+#            gradients = np.append(gradients,[gradient**2])
+#        
+#        RMSdx = np.sqrt(Edx+initial_sum_of_squares)
+#        dx = -1*RMSdx/RMSg*gradient
+#        Edx = decay*np.sum(dxs)/(max(dxs.size,1)) + (1-decay)*(dx**2)
+#        
+#        if dxs.size <= windowsize-1:
+#            dxs = np.append(dxs, [dx**2])
+#        else:
+#            dxs = np.delete(dxs,0)
+#            dxs = np.append(dxs,[dx**2])
+#            
+#        
+#        x = x + dx
+#        
+#        iterations += 1
+#        if iterations >= maximum_iterations:
+#            break
+#                
+#    return (x, values, xs)    
      
     
     

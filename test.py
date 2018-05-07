@@ -14,30 +14,28 @@ import oracles
 T = 32
 TESTREGRET = 0
 d = 2
-initw = torch.Tensor([[1],[1]])
+#initw = torch.Tensor([[1],[1]])
+#inputxlist,wealthlist,vlist,objlist = cb.cocob_torch(initw,d,T)
+#wealth_list = wealthlist[:,0].numpy()
+#v_list = vlist[:,0].numpy()
 
+# test COCOBONS via 1D function:
+input_xlist,wealth_list,v_list,obj_list = cb.coin_betting(1,T)
 
-inputxlist,wealthlist,vlist,objlist = cb.cocob_torch(initw,d,T)
-wealth_list = wealthlist[:,0].numpy()
-v_list = vlist[:,0].numpy()
-
-#input_xlist,wealth_list,v_list,obj_list = cb.coin_betting(1,T)
-
+# test AdaGrad via 1D function: 
 initial_x=np.zeros((1,1))
-initial_x = -0.5
+initial_x[0] = -0.5
 max_iterations_sgd = T
 initial_learning_rate = [0.01,0.1,1,10,100]
 ada_xs_list = np.array([])
 for ite in range(0,5):
-    ada_x, ada_values, ada_xs = cb.adagrad( oracles.coin_func_adagrad1, initial_x, max_iterations_sgd, initial_learning_rate[ite])
+    ada_x, ada_values, ada_xs = cb.adagrad( oracles.real_coin_value1, initial_x, max_iterations_sgd, initial_learning_rate[ite])
     ada_xs = np.array(ada_xs)
     ada_xs_list = np.append(ada_xs_list, ada_xs)
 #adadelta_x, adadelta_values, adadelta_xs = cb.adaDelta( oracles.coin_func_adagrad1, initial_x, max_iterations_sgd, 0.9, 2)
 
 if TESTREGRET==1:
     w_bm_list, w_list, regret_list = cb.regret_cb(T, input_x_list, wealth_list)
-
-
 
 plt.figure(1)
 line_wealth = plt.plot(wealth_list, linewidth=1, color='r', label='1D cb wealth')
@@ -107,20 +105,20 @@ if TESTREGRET==1:
     plt.ylabel('wealth')
     plt.show()
 
-matplotlib.rcParams['xtick.direction'] = 'out'
-matplotlib.rcParams['ytick.direction'] = 'out'
-
-delta = 0.025
-x1 = np.arange(-1.0, 1.0, delta)
-x2 = np.arange(-1.0, 1.0, delta)
-
-X1, X2 = np.meshgrid(x1, x2)
-Z = -X1**2 - X2**2
-#Z2 = np.exp(-(X1 - 1)**2 - (X2 - 1)**2)
-#Z = (Z1 - Z2) * 2
-
-plt.figure()
-CS = plt.contour(X1, X2, Z)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.title('Cone function')
+#matplotlib.rcParams['xtick.direction'] = 'out'
+#matplotlib.rcParams['ytick.direction'] = 'out'
+#
+#delta = 0.025
+#x1 = np.arange(-1.0, 1.0, delta)
+#x2 = np.arange(-1.0, 1.0, delta)
+#
+#X1, X2 = np.meshgrid(x1, x2)
+#Z = -X1**2 - X2**2
+##Z2 = np.exp(-(X1 - 1)**2 - (X2 - 1)**2)
+##Z = (Z1 - Z2) * 2
+#
+#plt.figure()
+#CS = plt.contour(X1, X2, Z)
+#plt.clabel(CS, inline=1, fontsize=10)
+#plt.title('Cone function')
 
